@@ -10,7 +10,7 @@
     "start": "node dist/src/index.js",
     "lint": "eslint --ext .ts ./",
     "build": "pnpm run clean && pnpm run compile && pnpm run build.prepare && pnpm run build.zip",
-    "build.prepare": "del-cli dist/test && cp package.json pnpm-lock.yaml dist && cd dist && pnpm install --frozen-lockfile --only=production && cd ..",
+    "build.prepare": "del-cli dist/test && cp package.json pnpm-lock.yaml dist && cd dist && pnpm install --frozen-lockfile --prod && cd ..",
     "build.zip": "cd dist && bestzip ../build.zip . && cd ..",
     "clean": "del-cli dist build.zip"
   },
