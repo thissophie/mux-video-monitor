@@ -1,7 +1,7 @@
 Parameters:
   RepoName:
     Type: String
-    Default: thepatrick/mux-video-monitor
+    Default: thissophie/mux-video-monitor
   OIDCProviderArn:
     Description: Arn for the GitHub OIDC Provider.
     Default: ""
