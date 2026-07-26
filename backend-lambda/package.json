@@ -9,8 +9,8 @@
     "prestart": "npm run compile",
     "start": "node dist/src/index.js",
     "lint": "eslint --ext .ts ./",
-    "build": "npm run clean && npm run compile && npm run build.prepare && npm run build.zip",
-    "build.prepare": "del-cli dist/test && cp package.json package-lock.json dist && cd dist && npm ci --only=production && cd ..",
+    "build": "pnpm run clean && pnpm run compile && pnpm run build.prepare && pnpm run build.zip",
+    "build.prepare": "del-cli dist/test && cp package.json pnpm-lock.yaml dist && cd dist && pnpm install --frozen-lockfile --only=production && cd ..",
     "build.zip": "cd dist && bestzip ../build.zip . && cd ..",
     "clean": "del-cli dist build.zip"
   },

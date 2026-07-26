@@ -19,7 +19,7 @@ echo object=$object
 if ! s3_object_exists $LAMBDA_BUCKET $object; then
   start_group "Installing dependencies"
   corepack enable
-  pnpm install
+  pnpm install --frozen-lockfile
   end_group
 
   start_group "Building"
