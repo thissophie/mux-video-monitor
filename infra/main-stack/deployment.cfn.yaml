@@ -114,7 +114,7 @@ Resources:
         S3Key: !Ref BackendLambdaS3Key
       Handler: src/index.getStream
       Role: !GetAtt "BackendLambdaRole.Arn"
-      Runtime: "nodejs18.x"
+      Runtime: "nodejs24.x"
       Timeout: 25
       Environment:
         Variables:
@@ -131,7 +131,7 @@ Resources:
         S3Key: !Ref BackendLambdaS3Key
       Handler: src/index.listRooms
       Role: !GetAtt "BackendLambdaRole.Arn"
-      Runtime: "nodejs18.x"
+      Runtime: "nodejs24.x"
       Timeout: 25
       Environment:
         Variables:
@@ -148,7 +148,7 @@ Resources:
         S3Key: !Ref BackendLambdaS3Key
       Handler: src/index.refresh
       Role: !GetAtt "BackendLambdaRole.Arn"
-      Runtime: "nodejs18.x"
+      Runtime: "nodejs24.x"
       Timeout: 25
       Environment:
         Variables:
@@ -166,7 +166,7 @@ Resources:
         S3Key: !Ref BackendLambdaS3Key
       Handler: src/index.muxWebhook
       Role: !GetAtt "BackendLambdaRole.Arn"
-      Runtime: "nodejs18.x"
+      Runtime: "nodejs24.x"
       Timeout: 25
       Environment:
         Variables:
@@ -177,7 +177,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       Handler: src/index.ablyKey
-      Runtime: nodejs18.x
+      Runtime: nodejs24.x
       CodeUri:
         Bucket: !Ref BackendLambdaS3Bucket
         Key: !Ref BackendLambdaS3Key
@@ -202,7 +202,7 @@ Resources:
         S3Key: !Ref BackendLambdaS3Key
       Handler: src/index.attend
       Role: !GetAtt "BackendLambdaRole.Arn"
-      Runtime: "nodejs18.x"
+      Runtime: "nodejs24.x"
       Timeout: 25
       Environment:
         Variables:
