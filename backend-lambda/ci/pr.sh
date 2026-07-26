@@ -18,11 +18,12 @@ echo object=$object
 
 if ! s3_object_exists $LAMBDA_BUCKET $object; then
   start_group "Installing dependencies"
-  npm ci
+  corepack enable
+  pnpm install --frozen-lockfile
   end_group
 
   start_group "Building"
-  npm run build
+  pnpm run build
   end_group
 
   start_group "Uploading to s3://$LAMBDA_BUCKET/$object"
