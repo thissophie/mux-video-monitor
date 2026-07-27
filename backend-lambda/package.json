@@ -10,7 +10,7 @@
     "start": "node dist/src/index.js",
     "lint": "eslint --ext .ts ./",
     "build": "pnpm run clean && pnpm run compile && pnpm run build.prepare && pnpm run build.zip",
-    "build.prepare": "rm -rf dist/test && cp package.json pnpm-lock.yaml dist && cd dist && pnpm install --frozen-lockfile --prod --node-linker=hoisted && cd ..",
+    "build.prepare": "rm -rf dist/test && cp package.json pnpm-lock.yaml dist && cd dist && pnpm install --frozen-lockfile --prod --node-linker=hoisted --ignore-workspace && cd ..",
     "build.zip": "cd dist && bestzip ../build.zip . && cd ..",
     "clean": "rm -rf dist build.zip"
   },
