@@ -16,9 +16,9 @@ end_group
 # end_group
 
 start_group "Building"
-npm run clean
-npm test
-npm run build
+pnpm run clean
+pnpm test
+pnpm run build
 end_group
 
 start_group "Uploading to s3://$FRONTEND_BUCKET"
