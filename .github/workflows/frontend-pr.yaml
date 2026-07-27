@@ -1,0 +1,26 @@
+name: Frontend PR
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - "frontend/**"
+      - "ci/**"
+      - ".github/workflows/frontend-pr.yaml"
+
+jobs:
+  build-frontend:
+    name: Build and test frontend
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - uses: actions/setup-node@v7.0.0
+        with:
+          node-version: "24"
+
+      - name: Build and test
+        run: ./frontend/ci/build.sh
