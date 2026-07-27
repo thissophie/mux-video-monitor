@@ -6,20 +6,9 @@ cd $(dirname "$0")/..
 
 . ../ci/functions.sh
 
-start_group "Installing dependencies"
-corepack enable
-pnpm install --frozen-lockfile
-end_group
-
-# start_group "Lint"
-# npm run lint
-# end_group
-
-start_group "Building"
-pnpm run clean
-pnpm test
-pnpm run build
-end_group
+# Install, test and build (shared with the pull_request check in
+# .github/workflows/frontend-pr.yaml so both run the identical build).
+ci/build.sh
 
 start_group "Uploading to s3://$FRONTEND_BUCKET"
 aws s3 sync --exclude "*" --include "*.html" --content-type "text/html; charset=utf-8" --delete ./dist "s3://${FRONTEND_BUCKET}/"

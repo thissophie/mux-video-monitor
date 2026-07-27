@@ -1,4 +1,14 @@
 module.exports = {
-  preset: 'ts-jest',
   testEnvironment: 'node',
+  transform: {
+    '^.+\\.ts$': [
+      '@swc/jest',
+      {
+        jsc: {
+          parser: { syntax: 'typescript' },
+          target: 'es2017',
+        },
+      },
+    ],
+  },
 };
