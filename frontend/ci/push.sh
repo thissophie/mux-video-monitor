@@ -7,7 +7,8 @@ cd $(dirname "$0")/..
 . ../ci/functions.sh
 
 start_group "Installing dependencies"
-npm ci
+corepack enable
+pnpm install --frozen-lockfile
 end_group
 
 # start_group "Lint"
