@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en-AU">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/svg+xml" href="https://2026.pycon.org.au/favicon2.svg" />
+    <title>Streaming — PyCon AU 2026</title>
+    <!-- Font preconnects and stylesheets -->
+    <link href="./css/attend.css?w" rel="stylesheet" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Manrope:wght@200..800&family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&family=Roboto+Slab:wght@100..900&display=swap"
+      rel="stylesheet"
+    />
+    <!-- Font Awesome -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css"
+      integrity="sha512-2SwdPD6INVrV/lHTZbO2nodKhrnDdJK9/kg2XD1r9uGqPo1cUbujc+IYdlYdEErWNu69gVcYgdxlmVmzTWnetw=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    />
+    <!-- Fathom Analytics -->
+    <script src="https://cdn.usefathom.com/script.js" data-site="BETINVUJ" defer></script>
+    <!-- Schema.org structured data -->
+    <link rel="stylesheet" href="https://2026.pycon.org.au/_astro/culture-and-community.lfk274wS.css" />
+  </head>
+  <body>
+    <include src="./src/pyconau2026/header.html"></include>
+
+    <section class="bg-stone pt-[98px] pb-20 overflow-hidden">
+      <div class="container relative">
+        <img
+          src="https://2026.pycon.org.au/images/star-violet.svg"
+          class="spin lg:block hidden absolute left-0 top-32"
+          alt=""
+        />
+        <div class="lg:w-[85%] w-full mx-auto">
+          <div class="fadeInUp breadcrumb pt-14">
+            <ul
+              class="flex items-center gap-2 text-violet font-sans font-extrabold text-10pt uppercase tracking-[0.12em]"
+            >
+              <li class="flex items-center gap-2"><a href="https://2026.pycon.org.au/">Home</a><span>&gt;</span></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <div class="container">
+        <div class="lg:w-[85%] w-full mx-auto relative pt-10">
+          <div class="fadeInUp w-full lg:w-[85%] relative">
+            <div class="font-serif lg:text-8xl text-[3.625rem] -tracking-[0.022em]">
+              <h1 class="text-violet">Watch Live</h1>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="bg-stone pt-10 pb-20">
+        <div class="container">
+          <div class="lg:w-[85%] w-full mx-auto">
+            <h2 class="fadeInUp text-4xl font-serif font-medium -tracking-[0.02em] mt-20 mb-8">Available Streams</h2>
+
+            <div id="loading" class="bg-stone pt-10 pb-20">
+              <div class="container">
+                <div class="p-4 bg-gray-50 -mx-8 font-light rounded-lg">
+                  <div class="flex space-x-4 justify-center align-middle">
+                    <h1 class="flex-initial text-2xl py-1 material-icons-outlined">sync</h1>
+                    <div class="flex-auto space-y-4">
+                      <p class="text-2xl font-thin">Loading streams...</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="space-y-4">
+              <div class="grid lg:grid-cols-3 gap-4" id="room-list"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    <section class="bg-lime pt-20">
+      <div class="container">
+        <div class="grid lg:grid-cols-2 grid-cols-1 gap-5 pb-20 fadeInUp">
+          <a href="https://2026.pycon.org.au/attend" class="btn-arrow btn-arrow--emerald btn-arrow--2col">
+            <span>Attendee Guide</span>
+          </a>
+          <a href="https://2026.pycon.org.au/schedule" class="btn-arrow btn-arrow--emerald btn-arrow--2col">
+            <span>Check the Schedule</span>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <include src="./src/pyconau2026/footer.html"></include>
+
+    <script type="module" src="./js/attend/list-pyconau2026.ts"></script>
+  </body>
+</html>

@@ -77,7 +77,7 @@ const createPlayer = async (id: string): Promise<Result<Error, void>> => {
   video.addEventListener('pause', updateLastUpdate);
   hls.on(Hls.Events.BUFFER_APPENDING, () => updateLastUpdate());
 
-  const setTitleLabel = createSetTitleLabel(roomNameEl);
+  const setTitleLabel = createSetTitleLabel(roomNameEl, '');
 
   let currentRoomName = '';
   let currentStreamURL;

@@ -54,4 +54,5 @@ export const iframeURI = (id: string): string => `dynamic.html?id=${encodeURICom
 export const viewerURI = (id: string): string => `all.html?only=${encodeURIComponent(id)}&v=${nanoid()}`;
 export const castURI = (id: string): string => `cast.html?id=${encodeURIComponent(id)}&v=${nanoid()}`;
 
-export const attendURI = (id: string): string => `play.html?stream=${encodeURIComponent(id)}&v=${nanoid()}`;
+export const attendURI = (id: string, playerOverride = 'play.html'): string =>
+  `${playerOverride}?stream=${encodeURIComponent(id)}&v=${nanoid()}`;

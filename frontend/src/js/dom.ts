@@ -47,6 +47,8 @@ export const elm =
 
 export const a = elm('a');
 
+export const h2 = elm('h2');
+
 export const anchor = <T extends Node>(
   href: string,
   childOrChildren: ElmChildren<T>,
