@@ -6,11 +6,11 @@ interface SetTitleLabelArguments {
 }
 
 export const createSetTitleLabel =
-  (el: HTMLElement) =>
+  (el: HTMLElement, loadingPlaceholder = '...') =>
   ({ loading = false, room, error }: SetTitleLabelArguments): void => {
     let description = '';
     if (loading) {
-      description = '...';
+      description = loadingPlaceholder;
     } else if (error) {
       description = `: ${error}`;
     }
