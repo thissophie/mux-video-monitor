@@ -349,6 +349,12 @@ describe('parseTagEdits', () => {
 Run from `backend-lambda/`: `./node_modules/.bin/jest`
 Expected: FAIL — cannot resolve `./parseTagEdits`.
 
+If instead ts-jest reports that the test file is not part of the TypeScript project, that is the
+`**/*.test.ts` exclude added in Step 1 (ts-jest reads the same `tsconfig.json`). The fix is a
+`tsconfig.test.json` that extends the base config and re-includes `src/**/*.ts`, pointed at from
+`jest.config.js` via `transform: { '^.+\\.ts$': ['ts-jest', { tsconfig: 'tsconfig.test.json' }] }`.
+Do **not** remove the exclude — it is what keeps test files out of `build.zip`.
+
 - [ ] **Step 6: Implement**
 
 Create `backend-lambda/src/handlers/admin/parseTagEdits.ts`:
@@ -604,6 +610,8 @@ grep -rn "InvalidResourceId" node_modules/@aws-sdk/client-ssm/dist-types/models/
 
 Expected: a hit for an `InvalidResourceId` exception class. The AWS SDK sets `err.name` to the exception's shape name. If the grep finds nothing, list the exceptions the operation declares and use the correct name in Step 2 instead of `InvalidResourceId`. Do not use `ParameterNotFound` — that belongs to the `GetParameter` family, not the tagging APIs.
 
+Also confirm that `removeTagsFromResource` is a no-op when a listed `TagKeys` entry is not present on the parameter. This matters because clearing a title on a stream that never had a `multiview:title` tag sends exactly that. AWS tag-removal APIs are normally idempotent, so no-op is the expected answer. If it turns out to raise instead, change `adminUpdateStream` (Step 4) to call `getRoomWithTags` *before* `applyTagEdits` and filter `plan.remove` down to keys that are actually present — do not silently swallow the error.
+
 - [ ] **Step 2: Implement the tag write**
 
 Create `backend-lambda/src/handlers/admin/applyTagEdits.ts`:
@@ -760,9 +768,13 @@ export const adminUpdateStream: APIGatewayProxyHandlerV2 = catchErrors(async (ev
     throw maybeApplied.value;
   }
 
+  // The tags are already committed. A refresh failure must not be reported as a
+  // failed save: getStreamStateFromDynamo reaches Mux, so clearing multiview:demo
+  // on a stream that is not currently live fails here for a save that landed
+  // correctly. Report it separately and let the 60s TTL catch up.
   const maybeRefreshed = await refreshAfterEdit(TableName, roomId);
   if (isFailure(maybeRefreshed)) {
-    throw maybeRefreshed.value;
+    console.log(`Tags written for ${roomId} but the refresh failed`, maybeRefreshed.value);
   }
 
   const maybeTags = await getRoomWithTags(ssm, `/multiview/mux/${roomId}`);
@@ -773,6 +785,7 @@ export const adminUpdateStream: APIGatewayProxyHandlerV2 = catchErrors(async (ev
   return response(
     {
       ok: true,
+      refreshed: !isFailure(maybeRefreshed),
       stream: { id: roomId, tags: successValue(maybeTags).tags },
     },
     200,
@@ -1043,14 +1056,23 @@ import { AccessDenied } from '../helpers/AccessDenied';
 import { AdminTags } from './fetchStreams';
 
 export interface TagEdits {
-  title: string;
-  order: string;
+  title?: string;
+  // Omitted entirely when the field is blank. A stream with no multiview:order tag
+  // is a supported state (getOrderFromTag defaults it), and sending '' would fail
+  // validation on every save, even one that only changed the title.
+  order?: string;
   show: boolean;
   demo: string | null;
 }
 
+export interface SavedStream {
+  tags: AdminTags;
+  refreshed: boolean;
+}
+
 interface SaveResponseOk {
   ok: true;
+  refreshed: boolean;
   stream: { id: string; tags: AdminTags };
 }
 
@@ -1059,7 +1081,7 @@ interface SaveResponseError {
   error: string;
 }
 
-export const saveStream = async (id: string, edits: TagEdits): Promise<Result<Error, AdminTags>> => {
+export const saveStream = async (id: string, edits: TagEdits): Promise<Result<Error, SavedStream>> => {
   try {
     const fetchResponse = await fetch(`/api/admin/streams/${encodeURIComponent(id)}`, {
       method: 'POST',
@@ -1077,12 +1099,14 @@ export const saveStream = async (id: string, edits: TagEdits): Promise<Result<Er
       throw new Error(body.error);
     }
 
-    return success(body.stream.tags);
+    return success({ tags: body.stream.tags, refreshed: body.refreshed });
   } catch (err) {
     return failure(err as Error);
   }
 };
 ```
+
+`JSON.stringify` drops keys whose value is `undefined`, so an omitted `order` or `title` never reaches the backend and `parseTagEdits` leaves that tag alone.
 
 - [ ] **Step 3: Write the page script**
 
@@ -1138,7 +1162,9 @@ const createRow = (stream: AdminStream, demos: string[]): HTMLTableRowElement =>
 
     void saveStream(stream.id, {
       title: titleInput.value,
-      order: orderInput.value,
+      // Blank order means "no multiview:order tag", which is a valid state — send
+      // nothing rather than '' so an untouched blank order cannot fail the save.
+      order: orderInput.value === '' ? undefined : orderInput.value,
       show: showInput.checked,
       demo: demoSelect.value === '' ? null : demoSelect.value,
     }).then((result) => {
@@ -1153,12 +1179,14 @@ const createRow = (stream: AdminStream, demos: string[]): HTMLTableRowElement =>
         return;
       }
 
-      const tags = successValue(result);
+      const { tags, refreshed } = successValue(result);
       titleInput.value = tags[TAG_TITLE] ?? '';
       orderInput.value = tags[TAG_ORDER] ?? '';
       showInput.checked = tags[TAG_SHOW] === 'true';
       demoSelect.value = tags[TAG_DEMO] ?? '';
-      status.textContent = `Saved ${new Date().toLocaleTimeString()}`;
+      status.textContent = refreshed
+        ? `Saved ${new Date().toLocaleTimeString()}`
+        : `Saved ${new Date().toLocaleTimeString()} — cache refresh failed, may take 60s`;
     });
   });
 
@@ -1284,6 +1312,8 @@ Then set a stream's demo to `offline` and confirm an open monitor tab reflects i
 - Enter a non-integer order (e.g. `1.5`) and save. Expected: status shows "Failed: order must be a whole number", and the tag is unchanged.
 - Clear a title and save. Expected: the `multiview:title` tag is removed from the parameter.
 - Set demo back to `(none)`. Expected: the `multiview:demo` tag is removed.
+- On a stream with **no** `multiview:order` tag (remove it in the console if none exists), change only the title and save. Expected: success. A `400 order must be a whole number` here means the blank-order omission in Task 6 Step 3 was dropped.
+- Set a demo on a stream that is **not** currently live, then clear it and save. Expected: status shows "Saved … — cache refresh failed, may take 60s" or a plain "Saved", but never "Failed". The tags must be correct in the console either way. A "Failed" here means the non-fatal refresh handling in Task 4 Step 4 was dropped.
 
 ---
 

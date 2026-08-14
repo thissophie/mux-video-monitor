@@ -153,9 +153,14 @@ change.
 - Malformed body or an invalid tag value → `invalidRequest()` (400) naming the offending field.
 - SSM write failure → propagates through `catchErrors` as a 500; nothing has been cached, so a retry
   is safe.
-- **Ably publish failure is logged and not fatal.** By that point the tags are written and both
-  caches are refreshed. Returning 500 would report a failed save that actually succeeded. This
-  mirrors `muxWebhook.ts:47-49`.
+- **Nothing after the SSM write is fatal.** Once `applyTagEdits` returns, the tags are committed and
+  the save has succeeded; reporting a 500 after that point would tell the operator their change did
+  not land when it did. So both the cache refresh and the Ably publish are logged on failure and the
+  response is still 200, carrying `refreshed: true|false` so the row can say "cache refresh failed,
+  may take 60s". This matters in practice, not just in theory: `getStreamStateFromDynamo` reaches
+  Mux through `makeGetStreamStateFromSSMAndMux`, which fails whenever `getStreamURL` does — so
+  clearing `multiview:demo` on a stream that is not currently live would otherwise report a failed
+  save. The Ably half mirrors `muxWebhook.ts:47-49`.
 
 ## Infra
 
