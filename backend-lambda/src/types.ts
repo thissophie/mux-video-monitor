@@ -8,4 +8,5 @@ export interface DecodedJWT {
   iss: string;
   aud: string;
   sub: string;
+  role: string;
 }

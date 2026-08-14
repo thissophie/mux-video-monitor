@@ -6,15 +6,17 @@ export const verifyTokenCookie = async (event: APIGatewayProxyEventV2, forceRefr
   const ndvCookie = parseCookies(event.cookies).NDV_AUD;
   if (ndvCookie == null) {
     console.log(`(requestId=${event.requestContext.requestId}) Access denied because there was no token in NDV_AUD.`);
-    return false;
+    return undefined;
   }
 
-  if (!(await verifyToken(ndvCookie, forceRefreshTokenKey))) {
+  const verifiedToken = await verifyToken(ndvCookie, forceRefreshTokenKey);
+
+  if (!verifiedToken) {
     console.log(
       `(requestId=${event.requestContext.requestId}) Access denied because the token in NDV_AUD did not verify.`,
     );
-    return false;
+    return undefined;
   }
 
-  return true;
+  return { cookie: ndvCookie, token: verifiedToken };
 };

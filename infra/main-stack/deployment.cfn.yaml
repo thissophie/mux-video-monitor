@@ -158,6 +158,25 @@ Resources:
           ATTEND_JWT_ISSUER: !Ref "AttendJWTIssuer"
           ATTEND_JWT_AUDIENCE: !Ref "AttendJWTAudience"
 
+  BackendDevtokenFn:
+    Type: AWS::Lambda::Function
+    Properties:
+      Code:
+        S3Bucket: !Ref BackendLambdaS3Bucket
+        S3Key: !Ref BackendLambdaS3Key
+      Handler: src/index.devtoken
+      Role: !GetAtt "BackendLambdaRole.Arn"
+      Runtime: "nodejs24.x"
+      Timeout: 25
+      Environment:
+        Variables:
+          CACHE_TABLE_NAME: !Ref "CacheTable"
+          ABLY_CLIENT_KEY: "/multiview/ably/client"
+          ATTEND_JWT_PRIVATE_KEY: "/multiview/attend/ATTEND_JWT_PRIVATE_KEY"
+          ATTEND_JWT_ISSUER: !Ref "AttendJWTIssuer"
+          ATTEND_JWT_AUDIENCE: !Ref "AttendJWTAudience"
+          ATTEND_JWT_REQUIRED_ROLE: 826205
+
   BackendMuxFn:
     Type: AWS::Lambda::Function
     Properties:
@@ -235,6 +254,7 @@ Resources:
                   - !GetAtt BackendGetStreamFn.Arn
                   - !GetAtt BackendListRoomsFn.Arn
                   - !GetAtt BackendRefreshFn.Arn
+                  - !GetAtt BackendDevtokenFn.Arn
                   - !GetAtt BackendMuxFn.Arn
                   - !GetAtt BackendAblyKeySlFn.Arn
                   - !Sub "${BackendAblyKeySlFn.Arn}:live"
@@ -323,6 +343,27 @@ Resources:
       RouteKey: GET /refresh
       Target: !Sub "integrations/${BackendRefreshIntegration}"
 
+  BackendDevtokenIntegration:
+    Type: AWS::ApiGatewayV2::Integration
+    Properties:
+      ApiId: !Ref BackendAPI
+      Description: "Get JWT for developer use"
+      ConnectionType: INTERNET
+      CredentialsArn: !GetAtt "BackendAPIRole.Arn"
+      PassthroughBehavior: "WHEN_NO_MATCH"
+      TimeoutInMillis: 29000
+      IntegrationMethod: "POST"
+      IntegrationType: "AWS_PROXY"
+      PayloadFormatVersion: "2.0"
+      IntegrationUri: !Sub "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${BackendDevtokenFn.Arn}/invocations"
+
+  BackendDevtokenRoute:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref BackendAPI
+      RouteKey: GET /devtoken
+      Target: !Sub "integrations/${BackendDevtokenIntegration}"
+
   BackendMuxIntegration:
     Type: AWS::ApiGatewayV2::Integration
     Properties:
@@ -395,6 +436,8 @@ Resources:
       - BackendListRoomsIntegration
       - BackendRefreshRoute
       - BackendRefreshIntegration
+      - BackendDevtokenRoute
+      - BackendDevtokenIntegration
       - BackendMuxRoute
       - BackendMuxIntegration
       - BackendAblyKeyRoute
