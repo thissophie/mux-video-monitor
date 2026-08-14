@@ -26,7 +26,7 @@ export const devtoken: APIGatewayProxyHandlerV2 = catchErrors(async (event, cont
     return accessDenied();
   }
 
-  const hasRequiredRole = requiredRoles.some((role) => maybeToken.token.role);
+  const hasRequiredRole = requiredRoles.some((role) => role === maybeToken.token.role);
   if (!hasRequiredRole) {
     console.log(
       `(requestId=${event.requestContext.requestId}) Access denied because the token does not have any of ${requiredRoles.join(',')}.`,
