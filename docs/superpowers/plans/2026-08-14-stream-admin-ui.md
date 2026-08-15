@@ -188,17 +188,51 @@ The pure core of the feature. Sets up the jest harness because this is the first
 
 - [ ] **Step 1: Set up the jest harness**
 
-`jest`, `@types/jest` and `ts-jest` are already devDependencies — no installs needed.
+**Do not use the `ts-jest` devDependency, despite it already being present.** ts-jest 29 cannot
+drive the TypeScript 7 compiler API this project pins — it fails with "does not expose the
+JavaScript compiler API required by ts-jest" and suggests aliasing a TypeScript 6 package.
+Downgrading TypeScript is the wrong fix. Use `@swc/jest`, which is what `frontend/jest.config.js`
+already uses.
+
+That needs two devDependencies. The registry is unreachable in this sandbox, so install from pnpm's
+local content-addressed store, which already has them because the frontend uses them:
+
+```bash
+pnpm add -D --offline @swc/core@^1.15.46 @swc/jest@^0.2.39
+```
+
+Expected: `+ @swc/core` and `+ @swc/jest`, with `package.json` and `pnpm-lock.yaml` both updated. The
+`ERR_PNPM_IGNORED_BUILDS` warning about `@swc/core` build scripts is fine — the native binary ships
+as a platform-specific optional dependency, not from a build script.
 
 Create `backend-lambda/jest.config.js`:
 
 ```javascript
 module.exports = {
   testEnvironment: 'node',
-  preset: 'ts-jest',
-  testMatch: ['**/*.test.ts'],
+  testMatch: ['<rootDir>/src/**/*.test.ts'],
+  // dist/ holds a copy of package.json after a build, which jest's haste map
+  // reports as a duplicate of the real one.
+  modulePathIgnorePatterns: ['<rootDir>/dist/'],
+  // @swc/jest rather than ts-jest: ts-jest 29 cannot use the TypeScript 7
+  // compiler API this project pins. Matches frontend/jest.config.js.
+  transform: {
+    '^.+\\.ts$': [
+      '@swc/jest',
+      {
+        jsc: {
+          parser: { syntax: 'typescript' },
+          target: 'es2020',
+        },
+      },
+    ],
+  },
 };
 ```
+
+`@swc/jest` transpiles without type-checking, and the `exclude` below keeps test files out of
+`tsc`'s program — so **test files are not type-checked by anything**. That is the same trade
+`frontend` already makes. `tsc --noEmit` still covers all non-test source.
 
 Add a `test` script to `backend-lambda/package.json`, immediately after the `"watch"` line:
 
@@ -355,11 +389,15 @@ describe('parseTagEdits', () => {
 Run from `backend-lambda/`: `./node_modules/.bin/jest`
 Expected: FAIL — cannot resolve `./parseTagEdits`.
 
-If instead ts-jest reports that the test file is not part of the TypeScript project, that is the
-`**/*.test.ts` exclude added in Step 1 (ts-jest reads the same `tsconfig.json`). The fix is a
-`tsconfig.test.json` that extends the base config and re-includes `src/**/*.ts`, pointed at from
-`jest.config.js` via `transform: { '^.+\\.ts$': ['ts-jest', { tsconfig: 'tsconfig.test.json' }] }`.
-Do **not** remove the exclude — it is what keeps test files out of `build.zip`.
+`@swc/jest` does not read `tsconfig.json`, so the `**/*.test.ts` exclude added in Step 1 does not
+affect the test run. Confirm the exclude is doing its job with:
+
+```bash
+./node_modules/.bin/tsc --noEmit --listFiles | grep -c "parseTagEdits.test.ts"
+```
+
+Expected: `0`. A non-zero count means test files would be emitted into `dist/` and shipped inside
+`build.zip`.
 
 - [ ] **Step 6: Implement**
 

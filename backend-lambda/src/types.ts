@@ -10,3 +10,11 @@ export interface DecodedJWT {
   sub: string;
   role: string;
 }
+
+/** @see {isAdminTagEditRequest} ts-auto-guard:type-guard */
+export interface AdminTagEditRequest {
+  title?: string;
+  order?: string | number;
+  show?: boolean;
+  demo?: string | null;
+}
