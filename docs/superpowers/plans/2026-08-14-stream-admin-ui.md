@@ -616,7 +616,11 @@ export { adminListStreams } from './handlers/adminListStreams';
 Run from `backend-lambda/`: `./node_modules/.bin/tsc --noEmit`
 Expected: no output.
 
-If `nextToken` produces an implicit-any or type-widening error under `strict`, keep the explicit `let nextToken: string | undefined = undefined;` annotation shown above — do not switch to `while (true)` with a `break`.
+The `page` annotation is required, not stylistic. Without it `tsc` fails with `TS7022: 'page'
+implicitly has type 'any' because it is referenced directly or indirectly in its own initializer` —
+`nextToken` is assigned from `page`, which comes from a call that takes `nextToken`. Keep both the
+`GetParametersByPathResult` annotation and the explicit `let nextToken: string | undefined`; do not
+switch to `while (true)` with a `break`.
 
 - [ ] **Step 5: Commit**
 
