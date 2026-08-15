@@ -24,6 +24,12 @@
 - Never return an SSM parameter *value* to a client. Values under `/multiview/mux/` are Mux token secrets.
 - Do not add routes to the monitor CloudFront distribution. It is deliberately unauthenticated (on-site event use); only the attendee distribution forwards cookies.
 - Commit after every task.
+- **Never write to AWS.** No `aws` CLI mutations, no CloudFormation deploys, no SSM tag writes, no
+  running the `TEST_HANDLER` blocks (they hit real AWS through the default credential chain).
+  Deployment happens only by merging to `main`. Tasks 1–6 are done on a branch and end at a pull
+  request; Task 7 is Sophie's, after the merge deploys.
+- Verification available in-session is limited to `tsc --noEmit`, `jest`, `prettier` and static
+  checks of the CloudFormation template. Nothing else may be claimed as verified.
 
 ## File Structure
 
@@ -1279,9 +1285,16 @@ git commit -m "feat: add stream admin page"
 
 ---
 
-### Task 7: End-to-end check against real AWS
+### Task 7: End-to-end check — POST-MERGE, SOPHIE ONLY
 
-There is no offline backend; `frontend/.proxyrc.js` proxies `/api` to production. This task is manual and needs the operator's own credentials.
+> **Not for the implementing agent.** Every step below needs AWS credentials and deployed
+> infrastructure. Agents must not attempt any of it, and must not report any of it as verified.
+> Tasks 1–6 end at a pull request; this task starts after that PR is merged and
+> `.github/workflows/main.yaml` has deployed.
+
+There is no offline backend — `frontend/.proxyrc.js` proxies `/api` to **production**. So the admin
+endpoints do not exist anywhere until the backend change is merged and deployed, and running the dev
+server before then shows a load error on the page. That is expected, not a bug to chase.
 
 **Files:** none — verification only.
 

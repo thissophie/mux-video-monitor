@@ -236,6 +236,11 @@ backend-lambda/  ./node_modules/.bin/jest
 frontend/        ./node_modules/.bin/tsc --noEmit
 ```
 
-Manual check against real AWS through the dev proxy: `pnpm start` in `frontend/` with a fresh
-`NDV_AUD_COOKIE`, open `/admin.html`, edit a tag, confirm the change lands in SSM and that an open
-monitor tab updates without a reload.
+That is the whole of the automated gate. Nothing here can be verified against AWS in-session: this
+repo deploys only by merging to `main`, and `.proxyrc.js` proxies `/api` to production, so the admin
+endpoints do not exist until the change is deployed.
+
+The end-to-end check is therefore **post-merge and Sophie's**: `pnpm start` in `frontend/` with a
+fresh `NDV_AUD_COOKIE`, open `/admin.html`, edit a tag, confirm the change lands in SSM and that an
+open monitor tab updates without a reload. Task 7 of the implementation plan lists the specific
+cases.
