@@ -22,6 +22,10 @@ if ! s3_object_exists $LAMBDA_BUCKET $object; then
   pnpm install --frozen-lockfile
   end_group
 
+  start_group "Test"
+  pnpm test
+  end_group
+
   start_group "Building"
   pnpm run build
   end_group
