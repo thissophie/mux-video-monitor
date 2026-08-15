@@ -237,8 +237,14 @@ module.exports = {
 Add a `test` script to `backend-lambda/package.json`, immediately after the `"watch"` line:
 
 ```json
-    "test": "jest",
+    "test": "ts-auto-guard --debug && jest",
 ```
+
+The `ts-auto-guard` call is not optional. `src/types.guard.ts` is generated **and gitignored**, so a
+fresh clone does not have it — and `helpers/verifyToken.ts` imports it, which means any test that
+transitively reaches a handler fails with `Cannot find module '../types.guard'`. Generating it as
+part of `test` fixes CI and a fresh local clone in one place. Running `./node_modules/.bin/jest`
+directly skips this, which is fine once the file exists.
 
 In `backend-lambda/tsconfig.json`, change the `exclude` array so test files are never emitted into `dist/` (and therefore never shipped inside `build.zip`):
 

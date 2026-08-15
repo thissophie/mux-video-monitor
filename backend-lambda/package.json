@@ -6,7 +6,7 @@
   "scripts": {
     "compile": "ts-auto-guard --debug && tsc",
     "watch": "tsc -w",
-    "test": "jest",
+    "test": "ts-auto-guard --debug && jest",
     "prestart": "pnpm run compile",
     "start": "node dist/src/index.js",
     "lint": "eslint --ext .ts ./",
