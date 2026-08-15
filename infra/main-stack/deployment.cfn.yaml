@@ -106,6 +106,24 @@ Resources:
       Roles:
         - !Ref "BackendLambdaRole"
 
+  # Separate from CanReadFromSSM so tagging stays scoped to the mux parameters --
+  # the admin UI has no reason to retag the ably or attend secrets.
+  CanTagMuxParameters:
+    Type: "AWS::IAM::Policy"
+    Properties:
+      PolicyName: "CanTagMuxParameters"
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: "Allow"
+            Action:
+              - "ssm:AddTagsToResource"
+              - "ssm:RemoveTagsFromResource"
+            Resource:
+              - !Sub "arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/multiview/mux/*"
+      Roles:
+        - !Ref "BackendLambdaRole"
+
   BackendGetStreamFn:
     Type: AWS::Lambda::Function
     Properties:
@@ -172,6 +190,45 @@ Resources:
         Variables:
           CACHE_TABLE_NAME: !Ref "CacheTable"
           ABLY_CLIENT_KEY: "/multiview/ably/client"
+          ATTEND_JWT_PRIVATE_KEY: "/multiview/attend/ATTEND_JWT_PRIVATE_KEY"
+          ATTEND_JWT_ISSUER: !Ref "AttendJWTIssuer"
+          ATTEND_JWT_AUDIENCE: !Ref "AttendJWTAudience"
+          ATTEND_JWT_REQUIRED_ROLE: 826205
+
+  BackendAdminListStreamsFn:
+    Type: AWS::Lambda::Function
+    Properties:
+      Code:
+        S3Bucket: !Ref BackendLambdaS3Bucket
+        S3Key: !Ref BackendLambdaS3Key
+      Handler: src/index.adminListStreams
+      Role: !GetAtt "BackendLambdaRole.Arn"
+      Runtime: "nodejs24.x"
+      Timeout: 25
+      Environment:
+        Variables:
+          CACHE_TABLE_NAME: !Ref "CacheTable"
+          ATTEND_JWT_PRIVATE_KEY: "/multiview/attend/ATTEND_JWT_PRIVATE_KEY"
+          ATTEND_JWT_ISSUER: !Ref "AttendJWTIssuer"
+          ATTEND_JWT_AUDIENCE: !Ref "AttendJWTAudience"
+          ATTEND_JWT_REQUIRED_ROLE: 826205
+
+  BackendAdminUpdateStreamFn:
+    Type: AWS::Lambda::Function
+    Properties:
+      Code:
+        S3Bucket: !Ref BackendLambdaS3Bucket
+        S3Key: !Ref BackendLambdaS3Key
+      Handler: src/index.adminUpdateStream
+      Role: !GetAtt "BackendLambdaRole.Arn"
+      Runtime: "nodejs24.x"
+      Timeout: 25
+      Environment:
+        Variables:
+          CACHE_TABLE_NAME: !Ref "CacheTable"
+          # Load-bearing: without it getAblyClient returns undefined and the
+          # publish is silently skipped, so monitors would not update live.
+          ABLY_SERVER_KEY: "/multiview/ably/server"
           ATTEND_JWT_PRIVATE_KEY: "/multiview/attend/ATTEND_JWT_PRIVATE_KEY"
           ATTEND_JWT_ISSUER: !Ref "AttendJWTIssuer"
           ATTEND_JWT_AUDIENCE: !Ref "AttendJWTAudience"
@@ -255,6 +312,8 @@ Resources:
                   - !GetAtt BackendListRoomsFn.Arn
                   - !GetAtt BackendRefreshFn.Arn
                   - !GetAtt BackendDevtokenFn.Arn
+                  - !GetAtt BackendAdminListStreamsFn.Arn
+                  - !GetAtt BackendAdminUpdateStreamFn.Arn
                   - !GetAtt BackendMuxFn.Arn
                   - !GetAtt BackendAblyKeySlFn.Arn
                   - !Sub "${BackendAblyKeySlFn.Arn}:live"
@@ -364,6 +423,48 @@ Resources:
       RouteKey: GET /devtoken
       Target: !Sub "integrations/${BackendDevtokenIntegration}"
 
+  BackendAdminListStreamsIntegration:
+    Type: AWS::ApiGatewayV2::Integration
+    Properties:
+      ApiId: !Ref BackendAPI
+      Description: "Admin: list streams"
+      ConnectionType: INTERNET
+      CredentialsArn: !GetAtt "BackendAPIRole.Arn"
+      PassthroughBehavior: "WHEN_NO_MATCH"
+      TimeoutInMillis: 29000
+      IntegrationMethod: "POST"
+      IntegrationType: "AWS_PROXY"
+      PayloadFormatVersion: "2.0"
+      IntegrationUri: !Sub "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${BackendAdminListStreamsFn.Arn}/invocations"
+
+  BackendAdminListStreamsRoute:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref BackendAPI
+      RouteKey: GET /admin/streams
+      Target: !Sub "integrations/${BackendAdminListStreamsIntegration}"
+
+  BackendAdminUpdateStreamIntegration:
+    Type: AWS::ApiGatewayV2::Integration
+    Properties:
+      ApiId: !Ref BackendAPI
+      Description: "Admin: update stream tags"
+      ConnectionType: INTERNET
+      CredentialsArn: !GetAtt "BackendAPIRole.Arn"
+      PassthroughBehavior: "WHEN_NO_MATCH"
+      TimeoutInMillis: 29000
+      IntegrationMethod: "POST"
+      IntegrationType: "AWS_PROXY"
+      PayloadFormatVersion: "2.0"
+      IntegrationUri: !Sub "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${BackendAdminUpdateStreamFn.Arn}/invocations"
+
+  BackendAdminUpdateStreamRoute:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref BackendAPI
+      RouteKey: POST /admin/streams/{muxTokenId}
+      Target: !Sub "integrations/${BackendAdminUpdateStreamIntegration}"
+
   BackendMuxIntegration:
     Type: AWS::ApiGatewayV2::Integration
     Properties:
@@ -438,6 +539,10 @@ Resources:
       - BackendRefreshIntegration
       - BackendDevtokenRoute
       - BackendDevtokenIntegration
+      - BackendAdminListStreamsRoute
+      - BackendAdminListStreamsIntegration
+      - BackendAdminUpdateStreamRoute
+      - BackendAdminUpdateStreamIntegration
       - BackendMuxRoute
       - BackendMuxIntegration
       - BackendAblyKeyRoute

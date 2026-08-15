@@ -5,3 +5,5 @@ export { muxWebhook } from './handlers/muxWebhook';
 export { ablyKey } from './handlers/ablyKey';
 export { attend } from './handlers/attend';
 export { devtoken } from './handlers/devtoken';
+export { adminListStreams } from './handlers/adminListStreams';
+export { adminUpdateStream } from './handlers/adminUpdateStream';
