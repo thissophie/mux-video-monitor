@@ -1,5 +1,8 @@
 packages:
   - .
 allowBuilds:
+  # The native binary comes from a platform-specific optional dependency, not the
+  # build script, so jest runs fine without it.
+  '@swc/core': false
   unrs-resolver: true
 minimumReleaseAge: 1440
