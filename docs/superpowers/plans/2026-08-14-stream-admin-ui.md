@@ -636,6 +636,7 @@ git commit -m "feat: add GET /admin/streams"
 
 **Files:**
 - Create: `backend-lambda/src/handlers/admin/applyTagEdits.ts`
+- Create: `backend-lambda/src/handlers/admin/readRoomTags.ts`
 - Create: `backend-lambda/src/handlers/admin/refreshAfterEdit.ts`
 - Create: `backend-lambda/src/handlers/adminUpdateStream.ts`
 - Modify: `backend-lambda/src/index.ts`
@@ -658,7 +659,16 @@ grep -rn "InvalidResourceId" node_modules/@aws-sdk/client-ssm/dist-types/models/
 
 Expected: a hit for an `InvalidResourceId` exception class. The AWS SDK sets `err.name` to the exception's shape name. If the grep finds nothing, list the exceptions the operation declares and use the correct name in Step 2 instead of `InvalidResourceId`. Do not use `ParameterNotFound` — that belongs to the `GetParameter` family, not the tagging APIs.
 
-Also confirm that `removeTagsFromResource` is a no-op when a listed `TagKeys` entry is not present on the parameter. This matters because clearing a title on a stream that never had a `multiview:title` tag sends exactly that. AWS tag-removal APIs are normally idempotent, so no-op is the expected answer. If it turns out to raise instead, change `adminUpdateStream` (Step 4) to call `getRoomWithTags` *before* `applyTagEdits` and filter `plan.remove` down to keys that are actually present — do not silently swallow the error.
+**Outcome when this plan was executed:** `InvalidResourceId` is declared for `AddTagsToResource`,
+`RemoveTagsFromResource` and `ListTagsForResource`. `ParameterNotFound` is not. The constant is correct.
+
+Whether `removeTagsFromResource` is a no-op for a `TagKeys` entry that is not present on the
+parameter is **not** answerable from the SDK types, and this repo cannot call AWS. Rather than ship
+an unverifiable assumption, the fallback described here was taken as the default: `adminUpdateStream`
+reads the current tags *before* `applyTagEdits` and filters `plan.remove` to keys that exist. That
+also turns an unknown `muxTokenId` into a 404 instead of a 500, because `getRoomWithTags` throws
+rather than returning a failure when the parameter is missing. The extra read is one
+`ListTagsForResource` call per save.
 
 - [ ] **Step 2: Implement the tag write**
 
