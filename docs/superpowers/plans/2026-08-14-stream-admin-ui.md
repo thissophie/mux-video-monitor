@@ -892,13 +892,29 @@ Five separate edits. Missing any of the last two produces routes that deploy cle
 
 - [ ] **Step 1: Grant the tagging permissions**
 
-In the policy containing `"ssm:GetParametersByPath"` (around line 98), add two actions to the same `Action` list. The existing `parameter/multiview/mux/*` resource entry already covers them, so the `Resource` list is unchanged:
+Add a **new** policy rather than extending `CanReadFromSSM`. That policy's `Resource` list also covers
+the ably and attend paths, so adding write actions there would grant tagging on secrets the admin UI
+has no reason to touch — and would leave a policy named "CanReadFromSSM" granting writes. Insert
+after the `CanReadFromSSM` resource:
 
 ```yaml
-              - "ssm:GetParametersByPath"
-              - "ssm:ListTagsForResource"
+  # Separate from CanReadFromSSM so tagging stays scoped to the mux parameters --
+  # the admin UI has no reason to retag the ably or attend secrets.
+  CanTagMuxParameters:
+    Type: "AWS::IAM::Policy"
+    Properties:
+      PolicyName: "CanTagMuxParameters"
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: "Allow"
+            Action:
               - "ssm:AddTagsToResource"
               - "ssm:RemoveTagsFromResource"
+            Resource:
+              - !Sub "arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/multiview/mux/*"
+      Roles:
+        - !Ref "BackendLambdaRole"
 ```
 
 - [ ] **Step 2: Add the two functions**
