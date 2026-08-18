@@ -3,22 +3,10 @@ import { attendURI, fetchRooms } from '../fetchRooms';
 import { AccessDenied } from '../helpers/AccessDenied';
 import { isFailure, successValue } from '../helpers/result';
 
-// <a href="#watch-1" class="block p-6 lg:p-8 rounded-2xl bg-lime">
-//   <h2 class="text-2xl lg:text-3xl font-serif font-bold text-charcoal mb-1">Ballroom 1</h2>
-// </a>
-
-const createRoomLink = (id: string, label: string): HTMLAnchorElement =>
-  anchor(
-    attendURI(id, 'play-pyconau2026.html'),
-    [h2(label, { class: 'text-2xl lg:text-3xl font-serif font-bold text-charcoal mb-1' })],
-    ['block', 'p-6', 'lg:p-8', 'rounded-2xl', 'bg-lime'],
-  );
-
-// ' [',
-// anchor(castURI(id), 'Cast'),
-// ']',
 const run = async () => {
+  const accessDenied = document.querySelector('div#access-denied');
   const loading = document.querySelector('div#loading');
+  const offline = document.querySelector('div#offline');
   const roomList = document.getElementById('room-list');
 
   const appendChildToRoomList = appendChild(roomList);
@@ -27,7 +15,8 @@ const run = async () => {
 
   if (isFailure(roomsResponse)) {
     if (roomsResponse.value instanceof AccessDenied) {
-      window.location.href = '/access-denied.html';
+      accessDenied.classList.remove('hidden');
+      loading.classList.add('hidden');
       return;
     }
     alert('Could not get rooms. Try again.');
@@ -36,11 +25,15 @@ const run = async () => {
 
   const rooms = successValue(roomsResponse);
 
-  for (const { id, name } of rooms) {
-    appendChildToRoomList(createRoomLink(id, name));
+  const lastRoom = rooms[rooms.length - 1];
+
+  if (lastRoom) {
+    window.location.href = attendURI(lastRoom.id, 'play-pyconau2026.html');
+    return;
   }
 
   loading.classList.add('hidden');
+  offline.classList.remove('hidden');
 };
 
 run().catch((err) => console.error('Failed somewhere', err));

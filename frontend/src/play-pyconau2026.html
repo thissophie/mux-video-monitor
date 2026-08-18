@@ -4,13 +4,11 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="icon" type="image/svg+xml" href="https://2026.pycon.org.au/favicon2.svg" />
-    <title>Streaming — PyCon AU 2026</title>
-    <!-- Font preconnects and stylesheets -->
+    <title>Watch Live — PyCon AU 2026</title>
     <link
       href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Manrope:wght@200..800&family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&family=Roboto+Slab:wght@100..900&display=swap"
       rel="stylesheet"
     />
-    <!-- Font Awesome -->
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css"
@@ -18,113 +16,33 @@
       crossorigin="anonymous"
       referrerpolicy="no-referrer"
     />
-    <!-- Fathom Analytics -->
-    <script src="https://cdn.usefathom.com/script.js" data-site="BETINVUJ" defer></script>
-    <!-- Schema.org structured data -->
     <link href="./css/attend.css" rel="stylesheet" />
-    <link rel="stylesheet" href="https://2026.pycon.org.au/_astro/culture-and-community.kN-AFtoY.css" />
+    <link href="./pyconau2026/attend.css" rel="stylesheet" />
   </head>
   <body>
-    <include src="./src/pyconau2026/header.html"></include>
+    <div class="min-h-screen flex flex-col dark:bg-charcoal">
+      <include src="./src/pyconau2026/header2.html"></include>
 
-    <section class="bg-stone pt-[98px] pb-20 overflow-hidden">
-      <div class="container relative">
-        <img
-          src="https://2026.pycon.org.au/images/star-violet.svg"
-          class="spin lg:block hidden absolute left-0 top-32"
-          alt=""
-        />
-        <div class="lg:w-[85%] w-full mx-auto">
-          <div class="fadeInUp breadcrumb pt-14">
-            <ul
-              class="flex items-center gap-2 text-violet font-sans font-extrabold text-10pt uppercase tracking-[0.12em]"
-            >
-              <li class="flex items-center gap-2"><a href="https://2026.pycon.org.au/">Home</a><span>&gt;</span></li>
-              <li class="flex items-center gap-2"><a href="attend-pyconau2026.html">Watch Live</a><span>&gt;</span></li>
-            </ul>
-          </div>
-        </div>
-      </div>
-      <div class="container">
-        <div class="lg:w-[85%] w-full mx-auto relative pt-10">
-          <div class="fadeInUp w-full lg:w-[85%] relative">
-            <div class="font-serif lg:text-8xl text-[3.625rem] -tracking-[0.022em]">
-              <h1 class="text-violet" id="room-name">&nbsp;</h1>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
+      <include src="./src/pyconau2026/play-tabs.html"></include>
 
-    <div id="loading" class="bg-stone pt-10 pb-20">
-      <div class="container">
-        <div class="p-4 bg-gray-50 -mx-8 font-light rounded-lg">
-          <div class="flex space-x-4 justify-center align-middle">
-            <h1 class="flex-initial text-2xl py-1 material-icons-outlined">sync</h1>
-            <div class="flex-auto space-y-4">
-              <p class="text-2xl font-thin">Loading stream...</p>
-            </div>
-          </div>
-        </div>
-      </div>
+      <include src="./src/pyconau2026/hls-not-supported.html"></include>
+
+      <h1 class="text-violet hidden" id="room-name">&nbsp;</h1>
+
+      <include src="./src/pyconau2026/play-infobar.html"></include>
+
+      <include src="./src/pyconau2026/play-loadingstream.html"></include>
+
+      <include src="./src/pyconau2026/play-video.html"></include>
+
+      <include src="./src/pyconau2026/play-offline.html"></include>
+
+      <include src="./src/pyconau2026/access-denied.html"></include>
+
+      <include src="./src/pyconau2026/footer2.html"></include>
     </div>
-
-    <div id="video-row" class="relative w-full hidden">
-      <video controls id="player" class="w-full h-full" tabindex="0"></video>
-      <div id="mute-button" class="flex flex-col h-full w-full absolute top-0 left-0 justify-center">
-        <div class="flex-initial flex flex-row justify-center content-center">
-          <button
-            class="flex-initial p-8 bg-green-500 rounded-3xl text-white text-9xl material-icons-outlined shadow-2xl active:shadow-none active:bg-green-700"
-            title="Unmute audio"
-          >
-            volume_off
-          </button>
-        </div>
-      </div>
-    </div>
-
-    <div id="offline" class="hidden bg-stone pt-10 pb-20">
-      <div class="container">
-        <div class="flex space-x-4">
-          <h1 class="flex-initial text-4xl">⚠️</h1>
-          <div class="flex-auto space-y-4">
-            <h2 id="offline-title" class="font-serif lg:text-5xl text-4xl font-medium tracking-[-0.02em] leading-[1.3]">
-              This stream is offline right now.
-            </h2>
-            <p class="text-2xl font-thin">
-              You might want to check
-              <a href="https://2026.pycon.org.au/schedule/" class="text-violet font-semibold underline">the schedule</a>
-              or <a href="attend-pyconau2026.html" class="text-violet font-semibold underline">the other streams</a>.
-            </p>
-            <p class="text-2xl font-thin">
-              If you're seeing this message when you expect the stream to be live for this room try refreshing this
-              page.
-            </p>
-            <p class="text-2xl font-thin">
-              If you've had to refresh this page more than once, please let us know through Discord.
-            </p>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div id="last-update" class="hidden p-4 bg-gray-50 font-mono font-light">...</div>
-
-    <section class="bg-lime pt-20">
-      <div class="container">
-        <div class="grid lg:grid-cols-2 grid-cols-1 gap-5 pb-20 fadeInUp">
-          <a href="attend-pyconau2026.html" class="btn-arrow btn-arrow--emerald btn-arrow--2col">
-            <span>Other Streams</span>
-          </a>
-          <a href="https://2026.pycon.org.au/schedule" class="btn-arrow btn-arrow--emerald btn-arrow--2col">
-            <span>Check the Schedule</span>
-          </a>
-        </div>
-      </div>
-    </section>
-
-    <include src="./src/pyconau2026/footer.html"></include>
 
     <script type="module" src="./js/attend/play.ts"></script>
+    <script type="module" src="./js/attend/tabs-pyconau2026.ts"></script>
   </body>
 </html>

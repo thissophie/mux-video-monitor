@@ -1,0 +1,157 @@
+@import 'tailwindcss';
+
+/* Theme ported verbatim from pyconau-2026-website src/styles/style.css.
+   Keep values in lockstep with the marketing site — colour accuracy first. */
+@theme {
+  /* Colors */
+  --color-charcoal: #282828;
+  --color-stone: #eaeaea;
+  --color-lemon: #f2bf36;
+  --color-lime: #bdf462;
+  --color-coral: #ef553c;
+  --color-emerald: #249f4f;
+  --color-lavender: #b380ff;
+  --color-violet: #511fe5;
+
+  /* Font Families */
+  --font-sans: 'Plus Jakarta Sans', sans-serif;
+  --font-serif: 'Roboto Slab', serif;
+
+  /* Font Weights */
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+  --font-weight-extrabold: 800;
+
+  /* Font Sizes with Line Heights */
+  --text-xs: 0.875rem;
+  --text-xs--line-height: 1.25;
+
+  --text-sm: 1rem;
+  --text-sm--line-height: 1.625;
+
+  --text-base: 1.125rem;
+  --text-base--line-height: 1.5555555556;
+
+  --text-lg: 1.375rem;
+  --text-lg--line-height: 1.4545454545;
+
+  --text-xl: 1.5rem;
+  --text-xl--line-height: 1.2083333333;
+
+  --text-2xl: 1.625rem;
+  --text-2xl--line-height: 1.25;
+
+  --text-3xl: 1.75rem;
+  --text-3xl--line-height: 1.1071428571;
+  --text-3xl--letter-spacing: 0.02em;
+
+  --text-4xl: 2.25rem;
+  --text-4xl--line-height: 1;
+
+  --text-5xl: 2.625rem;
+  --text-5xl--line-height: 1.1904761905;
+
+  --text-6xl: 4.375rem;
+  --text-6xl--line-height: 0.9714285714;
+  --text-6xl--letter-spacing: -0.022em;
+
+  --text-10pt: 0.625rem;
+  --text-10pt--line-height: 1;
+}
+
+[x-cloak] {
+  display: none !important;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  @apply bg-stone text-charcoal font-sans antialiased;
+}
+
+p,
+ul li {
+  @apply font-sans text-base font-light tracking-[0.01em] leading-normal;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  @apply font-serif font-medium tracking-[-0.02em] leading-[1.3];
+}
+
+/* Buttons — ported from the website */
+.btn {
+  @apply bg-lime
+    text-black
+    rounded-[1.25rem]
+    px-10
+    py-2
+    font-sans
+    lg:text-base
+    text-sm
+    font-semibold
+    hover:rounded-none
+    transition-all
+    duration-300;
+}
+.btn:disabled {
+  @apply opacity-50 hover:rounded-[1.25rem] cursor-default;
+}
+.btn--lavender {
+  @apply bg-lavender text-stone;
+}
+.btn--emerald {
+  @apply bg-emerald text-charcoal;
+}
+.btn--stone {
+  @apply bg-stone text-charcoal;
+}
+.btn--violet {
+  @apply bg-violet text-stone;
+}
+
+.tag {
+  @apply text-10pt font-sans font-extrabold tracking-[0.12em] uppercase rounded-[4.375rem] border-emerald border py-2 px-4;
+}
+.tag--lime {
+  @apply border-lime;
+}
+
+/* Scalloped band dividers — ported from the website */
+.header-divider {
+  @apply relative
+    bg-gradient-to-b
+    from-charcoal
+    from-50%
+    to-stone
+    to-50%
+    dark:to-charcoal
+    h-[66px]
+    lg:h-[132px]
+    overflow-hidden
+    after:content-['']
+    after:absolute
+    after:bottom-0
+    after:left-1/2
+    after:-translate-x-1/2
+    after:bg-[url('./images/header-divider.svg')]
+    after:bg-contain
+    after:bg-center
+    after:bg-no-repeat
+    after:w-[1613px]
+    after:h-full
+    -mt-px
+    -mb-px;
+}
+.header-divider--lime {
+  @apply after:bg-[url('./images/header-divider--lime.svg')];
+}
+.header-divider--flipped {
+  @apply rotate-180;
+}

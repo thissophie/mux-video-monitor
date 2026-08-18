@@ -8,12 +8,19 @@ import { Result, isFailure, success, successValue } from '../helpers/result';
 import { nowIs } from '../nowIs';
 import { NotFound } from '../helpers/NotFound';
 
-const createPlayer = async (id: string): Promise<Result<Error, void>> => {
-  if (!Hls.isSupported()) {
-    window.location.href = '/hls-not-supported.html';
+const showAccessDenied = (accessDenied: Element) => {
+  if (accessDenied !== undefined) {
+    accessDenied.classList.remove('hidden');
     return;
   }
 
+  window.location.href = '/attend-pyconau2026.html';
+};
+
+const createPlayer = async (id: string): Promise<Result<Error, void>> => {
+  const params = new URL(location.href).searchParams;
+
+  const accessDenied = document.querySelector('div#access-denied');
   const loadingEl = document.querySelector('#loading');
   const video = document.getElementById('player') as HTMLVideoElement;
   const videoContainer = document.getElementById('video-row') as HTMLDivElement;
@@ -24,9 +31,19 @@ const createPlayer = async (id: string): Promise<Result<Error, void>> => {
   const muteOverlay = document.getElementById('mute-button') as HTMLDivElement;
   const muteButton = muteOverlay.querySelector('button');
 
+  const hlsNotSupported = document.querySelector('#hls-not-supported');
+  if (!Hls.isSupported() || params.get('hlsnotsupported') === 'true') {
+    if (hlsNotSupported) {
+      hlsNotSupported.classList.remove('hidden');
+      loadingEl.classList.add('hidden');
+    } else {
+      window.location.href = '/hls-not-supported.html';
+    }
+    return;
+  }
+
   const lastUpdate = createTextThing(lastUpdateEl);
 
-  const params = new URL(location.href).searchParams;
   const hlsDebug = params.get('hlsdebug') === 'true';
   const showLastUpdate = params.get('showlastupdate') === 'true';
 
@@ -84,7 +101,7 @@ const createPlayer = async (id: string): Promise<Result<Error, void>> => {
 
   const showError = (message: string) => {
     offlineEl.classList.remove('hidden');
-    offlineEl.querySelector('p#offline-title').textContent = `${message}`;
+    offlineEl.querySelector('#offline-title').textContent = `${message}`;
     videoContainer.classList.add('hidden');
   };
 
@@ -116,7 +133,7 @@ const createPlayer = async (id: string): Promise<Result<Error, void>> => {
       const maybeState = await fetchState(id);
       if (isFailure(maybeState)) {
         if (maybeState.value instanceof AccessDenied) {
-          window.location.href = '/access-denied.html';
+          showAccessDenied(accessDenied);
           return;
         }
         if (maybeState.value instanceof NotFound) {
@@ -280,7 +297,8 @@ const run = async () => {
 
 run().catch((err) => {
   if (err instanceof AccessDenied) {
-    window.location.href = '/access-denied.html';
+    showAccessDenied(undefined);
+    return;
   }
   console.error('Failed somewhere', err);
 });
