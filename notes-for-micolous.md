@@ -17,7 +17,7 @@ Things you might need during the conference:
 Much less likely to come up, but just in case
 1. The backend caches things in dynamodb. You can force this to refresh using https://live.aws.nextdayvideo.com.au/api/refresh
 2. Everything is deployed in the NDV AWS account in us-east-1 (I know)
-3. Before the admin interface existed I used to just manage things in Parameter Store - https://162559259314-6gfmeiej.us-east-1.console.aws.amazon.com/systems-manager/parameters/?region=us-east-1&tab=Table - the stream name/order/fake-override parameters are in tags on the parameters that start with `/multiview/mux/{mux-steam-id}`
+3. Before the admin interface existed I used to just manage things in Parameter Store - https://162559259314-6gfmeiej.us-east-1.console.aws.amazon.com/systems-manager/parameters/?region=us-east-1&tab=Table - the stream name/order/fake-override parameters are in tags on the parameters that start with `/multiview/mux/{mux-steam-id}`. Anytime you change things here you'll need to use the /api/refresh endpoint above or clients won't pick it up.
 4. Do NOT modify `ATTEND_JWT_AUDIENCE`, `ATTEND_JWT_ISSUER` or `ATTEND_JWT_PRIVATE_KEY` without coordinating with Sophie or Jack (these values come from Pretix).
 
 What things are used:
