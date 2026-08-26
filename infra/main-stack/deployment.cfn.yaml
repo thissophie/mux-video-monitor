@@ -193,7 +193,7 @@ Resources:
           ATTEND_JWT_PRIVATE_KEY: "/multiview/attend/ATTEND_JWT_PRIVATE_KEY"
           ATTEND_JWT_ISSUER: !Ref "AttendJWTIssuer"
           ATTEND_JWT_AUDIENCE: !Ref "AttendJWTAudience"
-          ATTEND_JWT_REQUIRED_ROLE: 826205
+          ATTEND_JWT_REQUIRED_ROLE: 826205,1122991
 
   BackendAdminListStreamsFn:
     Type: AWS::Lambda::Function
