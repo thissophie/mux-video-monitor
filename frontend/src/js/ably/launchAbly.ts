@@ -55,6 +55,7 @@ export type AblyStreamUpdate = {
   state?: 'active' | 'not-active' | undefined;
   streamURL?: string | undefined;
   title?: string | undefined;
+  muxDataEnvironmentKey?: string | undefined;
 };
 
 // {

@@ -6,8 +6,10 @@ import { StreamStateWithTitle } from './StreamState';
 import { demos } from './demos';
 import { maybeGetSecret } from '../../helpers/maybeGetSecret';
 
+export const MUX_DATA_ENVIRONMENT_KEY_TAG = 'multiview:data-env-key';
+
 export const makeGetStreamStateFromSSMAndMux =
-  (ssm: SSM) =>
+  (ssm: SSM, fetchStreamURL = getStreamURL) =>
   async (roomId: string): Promise<Result<Error, StreamStateWithTitle>> => {
     const maybeMuxTokenSecret = await maybeGetSecret(ssm, `/multiview/mux/${roomId}`);
     if (isFailure(maybeMuxTokenSecret)) {
@@ -24,19 +26,21 @@ export const makeGetStreamStateFromSSMAndMux =
     const { tags } = successValue(maybeGetTags);
 
     const title = tags['multiview:title'] || roomId;
+    const muxDataEnvironmentKey = tags[MUX_DATA_ENVIRONMENT_KEY_TAG]?.trim();
+    const dataConfiguration = muxDataEnvironmentKey ? { muxDataEnvironmentKey } : {};
 
     const demoResponse = demos[tags['multiview:demo'] || 'none'];
     if (demoResponse) {
-      return success({ ...demoResponse, title });
+      return success({ ...demoResponse, title, ...dataConfiguration });
     }
     const muxTokenSecret = successValue(maybeMuxTokenSecret);
 
-    const maybeStream = await getStreamURL(roomId, muxTokenSecret);
+    const maybeStream = await fetchStreamURL(roomId, muxTokenSecret);
     if (isFailure(maybeStream)) {
       return failure(new Error('Unable to retrieve stream state from mux'));
     }
 
     const stream = successValue(maybeStream);
 
-    return success({ ...stream, title });
+    return success({ ...stream, title, ...dataConfiguration });
   };

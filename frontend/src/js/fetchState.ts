@@ -8,12 +8,14 @@ interface MuxStreamStateOnline {
   online: true;
   stream: string;
   title: string;
+  muxDataEnvironmentKey?: string;
 }
 
 interface MuxStreamStateOffline {
   ok: true;
   online: false;
   title: string;
+  muxDataEnvironmentKey?: string;
 }
 
 interface MuxStreamStateError {
