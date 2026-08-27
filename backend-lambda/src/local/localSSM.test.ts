@@ -61,4 +61,12 @@ describe('local SSM configuration', () => {
       'must be under /multiview/mux/',
     );
   });
+
+  it('matches SSM missing-resource behavior when listing tags', async () => {
+    const ssm = makeLocalSSM(parseLocalParameters(configuration));
+
+    await expect(
+      ssm.listTagsForResource({ ResourceType: 'Parameter', ResourceId: '/multiview/mux/missing-room' }),
+    ).rejects.toMatchObject({ name: 'InvalidResourceId' });
+  });
 });

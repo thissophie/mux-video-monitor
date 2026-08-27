@@ -1,21 +1,22 @@
 import express from 'express';
 import { isFailure, successValue } from '../helpers/result';
-import { ssm } from '../helpers/ssm';
 import { getStreamResponse } from '../handlers/mux/getStreamResponse';
 import { makeGetStreamStateFromSSMAndMux } from '../handlers/mux/makeGetStreamStateFromSSMAndMux';
-import { getRoomsFromSSM } from '../handlers/rooms/getRoomsFromSSM';
+import { makeGetRoomsFromSSM } from '../handlers/rooms/getRoomsFromSSM';
+import { makeLocalSSM, parseLocalParameters } from './localSSM';
 
-const encodedParameters = process.env.LOCAL_SSM_PARAMETERS;
-if (!encodedParameters) {
+if (!process.env.LOCAL_SSM_PARAMETERS) {
   throw new Error('LOCAL_SSM_PARAMETERS is not set; copy .env.example to .env and configure the local rooms');
 }
 
-const getStreamState = makeGetStreamStateFromSSMAndMux(ssm);
+const localSSM = makeLocalSSM(parseLocalParameters(process.env.LOCAL_SSM_PARAMETERS));
+const getRooms = makeGetRoomsFromSSM(localSSM);
+const getStreamState = makeGetStreamStateFromSSMAndMux(localSSM);
 const app = express();
 
 app.get('/api/stream', async (_request, response) => {
   try {
-    const result = await getRoomsFromSSM();
+    const result = await getRooms();
     if (isFailure(result)) {
       response.status(500).json({ ok: false, error: result.value.message });
       return;

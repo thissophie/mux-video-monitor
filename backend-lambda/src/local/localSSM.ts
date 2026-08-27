@@ -51,9 +51,15 @@ export const makeLocalSSM = (parameters: LocalParameters): SSM =>
         .filter((name) => Path !== undefined && name.startsWith(Path))
         .map((Name) => ({ Name, Type: 'SecureString' as const })),
     }),
-    listTagsForResource: async ({ ResourceId }: { ResourceId?: string }) => ({
-      TagList: Object.entries(ResourceId === undefined ? {} : (parameters[ResourceId]?.tags ?? {})).map(
-        ([Key, Value]) => ({ Key, Value }),
-      ),
-    }),
+    listTagsForResource: async ({ ResourceId }: { ResourceId?: string }) => {
+      const parameter = ResourceId === undefined ? undefined : parameters[ResourceId];
+      if (parameter === undefined) {
+        const error = new Error(`Parameter ${ResourceId ?? '(missing resource ID)'} not found`);
+        error.name = 'InvalidResourceId';
+        throw error;
+      }
+      return {
+        TagList: Object.entries(parameter.tags).map(([Key, Value]) => ({ Key, Value })),
+      };
+    },
   }) as unknown as SSM;
