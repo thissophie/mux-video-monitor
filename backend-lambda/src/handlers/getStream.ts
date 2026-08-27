@@ -5,6 +5,7 @@ import { isFailure, successValue } from '../helpers/result';
 import { verifyTokenCookie } from '../helpers/verifyTokenCookie';
 import { TableName } from '../helpers/TableName';
 import { getStreamStateFromDynamo } from './mux/getStreamStateFromDynamo';
+import { getStreamResponse } from './mux/getStreamResponse';
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export const getStream: APIGatewayProxyHandlerV2 = catchErrors(async (event, context) => {
@@ -29,18 +30,9 @@ export const getStream: APIGatewayProxyHandlerV2 = catchErrors(async (event, con
 
   const state = successValue(maybeState);
 
-  return response(
-    {
-      ok: true,
-      online: state.state === 'active',
-      stream: state.state === 'active' && state.streamURL,
-      title: state.title,
-    },
-    200,
-    {
-      'Cache-Control': 'no-cache',
-    },
-  );
+  return response(getStreamResponse(state), 200, {
+    'Cache-Control': 'no-cache',
+  });
 });
 
 if (process.env.TEST_HANDLER === 'getStream') {

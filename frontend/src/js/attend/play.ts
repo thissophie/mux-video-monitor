@@ -1,4 +1,5 @@
 import Hls from 'hls.js';
+import mux from 'mux-embed';
 import { createAblySingleStream } from '../ably/createAblyOrchestrator';
 import { createTextThing } from '../createTextThing';
 import { createSetTitleLabel } from '../dynamic/createSetTitleLabel';
@@ -7,6 +8,7 @@ import { AccessDenied } from '../helpers/AccessDenied';
 import { Result, isFailure, success, successValue } from '../helpers/result';
 import { nowIs } from '../nowIs';
 import { NotFound } from '../helpers/NotFound';
+import { createMuxDataMonitor } from './muxData';
 
 const showAccessDenied = (accessDenied: Element) => {
   if (accessDenied !== undefined) {
@@ -66,6 +68,7 @@ const createPlayer = async (id: string): Promise<Result<Error, void>> => {
     manifestLoadingMaxRetry: Infinity,
     manifestLoadingMaxRetryTimeout: 5000,
   });
+  const muxDataMonitor = createMuxDataMonitor(mux, video, hls, Hls, mux.utils.now());
   hls.attachMedia(video);
   hls.on(Hls.Events.MEDIA_ATTACHED, () => {
     if (showMuteAfterAttach) {
@@ -161,6 +164,12 @@ const createPlayer = async (id: string): Promise<Result<Error, void>> => {
       if (force || state.stream !== currentStreamURL) {
         hls.loadSource(state.stream + '?cdn=fastly');
       }
+      muxDataMonitor.track({
+        roomId: id,
+        title: state.title,
+        streamURL: state.stream,
+        muxDataEnvironmentKey: state.muxDataEnvironmentKey,
+      });
 
       currentStreamURL = state.stream;
     } else {
@@ -258,15 +267,21 @@ const createPlayer = async (id: string): Promise<Result<Error, void>> => {
     }
   });
 
-  const ablyTask = createAblySingleStream(({ roomId, state, streamURL, title }) => {
+  const ablyTask = createAblySingleStream(({ roomId, state, streamURL, title, muxDataEnvironmentKey }) => {
     if (roomId !== id) {
       // Ignore this message, it's not for this room
       return;
     }
     if (state === 'active') {
-      void refreshFromState(false, { ok: true, online: true, stream: streamURL, title });
+      void refreshFromState(false, {
+        ok: true,
+        online: true,
+        stream: streamURL,
+        title,
+        muxDataEnvironmentKey,
+      });
     } else {
-      void refreshFromState(false, { ok: true, online: false, title });
+      void refreshFromState(false, { ok: true, online: false, title, muxDataEnvironmentKey });
     }
   });
 
