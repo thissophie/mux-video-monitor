@@ -2,7 +2,7 @@ const { globalAgent } = require('https');
 const { createProxyMiddleware } = require('http-proxy-middleware');
 const localStreamPath = require('./localStreamPath');
 
-const cookie = 'NDV_AUD=' + encodeURIComponent(process.env.NDV_AUD_COOKIE);
+const cookie = 'NDV_AUD=' + encodeURIComponent(process.env.NDV_AUD_COOKIE || '');
 const localApiUrl = process.env.LOCAL_API_URL;
 
 module.exports = function (app) {
