@@ -4,6 +4,7 @@
   "description": "",
   "scripts": {
     "start": "parcel src/*.html",
+    "start:local": "node --env-file=../.env ./node_modules/parcel/lib/bin.js src/*.html",
     "build": "tsc --noEmit && parcel build src/*.html",
     "lint": "eslint --ext .ts ./src/ && prettier --check ./src/",
     "test": "jest",

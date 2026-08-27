@@ -1,4 +1,5 @@
 import PQueue from '@esm2cjs/p-queue';
+import { SSM } from '@aws-sdk/client-ssm';
 import { notUndefined } from '../../helpers/notUndefined';
 import { failure, isFailure, isSuccess, Result, success, successValue } from '../../helpers/result';
 import { ssm } from '../../helpers/ssm';
@@ -8,10 +9,10 @@ import { Room } from './Room';
 
 const roomTagsQueue = new PQueue({ concurrency: 4 });
 
-export const getRoomsFromSSM = async (): Promise<Result<Error, Room[]>> => {
+export const makeGetRoomsFromSSM = (roomSSM: SSM) => async (): Promise<Result<Error, Room[]>> => {
   const path = '/multiview/mux/';
 
-  const { Parameters } = await ssm.getParametersByPath({ Path: path });
+  const { Parameters } = await roomSSM.getParametersByPath({ Path: path });
 
   if (Parameters == null) {
     return failure(new Error('Unexpected AWS response'));
@@ -20,7 +21,7 @@ export const getRoomsFromSSM = async (): Promise<Result<Error, Room[]>> => {
   const eventuallyNames = Parameters.map(({ Name }) => Name)
     .filter(notUndefined)
     .map((name) => {
-      const x = roomTagsQueue.add(() => getRoomWithTags(ssm, name));
+      const x = roomTagsQueue.add(() => getRoomWithTags(roomSSM, name));
       return x;
     });
 
@@ -50,3 +51,5 @@ export const getRoomsFromSSM = async (): Promise<Result<Error, Room[]>> => {
 
   return success(rooms);
 };
+
+export const getRoomsFromSSM = makeGetRoomsFromSSM(ssm);

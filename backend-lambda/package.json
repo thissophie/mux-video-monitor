@@ -7,6 +7,7 @@
     "compile": "ts-auto-guard --debug && tsc",
     "watch": "tsc -w",
     "test": "ts-auto-guard --debug && jest",
+    "local": "pnpm run compile && node --env-file=../.env dist/src/local/server.js",
     "prestart": "pnpm run compile",
     "start": "node dist/src/index.js",
     "lint": "eslint --ext .ts ./",
