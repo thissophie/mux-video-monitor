@@ -63,5 +63,5 @@ module.exports = function (app) {
 };
 ```
 
-Thnen passing in your `NDV_AUD` cookie as the environment variable `NDV_AUD_COOKIE` 
-when starting the frontend dev server.
+Then pass your `NDV_AUD` cookie as the `NDV_AUD_COOKIE` environment variable
+when starting the frontend development server.
