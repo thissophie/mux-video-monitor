@@ -70,7 +70,7 @@ const createPlayer = async (id: string): Promise<Result<Error, void>> => {
   const muxDataMonitor = createMuxDataMonitor(mux, video, hls, Hls, mux.utils.now());
   hls.attachMedia(video);
   hls.on(Hls.Events.MEDIA_ATTACHED, () => {
-    prepareAttachedMedia(video, muteOverlay);
+    void prepareAttachedMedia(video, muteOverlay);
   });
 
   muteButton.addEventListener('click', () => {

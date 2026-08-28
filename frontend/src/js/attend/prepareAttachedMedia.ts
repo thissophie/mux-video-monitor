@@ -1,5 +1,9 @@
-export const prepareAttachedMedia = (video: HTMLVideoElement, muteOverlay: HTMLDivElement) => {
+export const prepareAttachedMedia = async (video: HTMLVideoElement, muteOverlay: HTMLDivElement) => {
   muteOverlay.classList.remove('hidden');
   video.muted = true;
-  void video.play();
+  try {
+    await video.play();
+  } catch (error) {
+    console.warn('Unable to resume muted playback after media attach', error);
+  }
 };
