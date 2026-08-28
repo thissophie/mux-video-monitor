@@ -9,6 +9,7 @@ import { Result, isFailure, success, successValue } from '../helpers/result';
 import { nowIs } from '../nowIs';
 import { NotFound } from '../helpers/NotFound';
 import { createMuxDataMonitor } from './muxData';
+import { prepareAttachedMedia } from './prepareAttachedMedia';
 
 const showAccessDenied = (accessDenied: Element) => {
   if (accessDenied !== undefined) {
@@ -49,8 +50,6 @@ const createPlayer = async (id: string): Promise<Result<Error, void>> => {
   const hlsDebug = params.get('hlsdebug') === 'true';
   const showLastUpdate = params.get('showlastupdate') === 'true';
 
-  const showMuteAfterAttach = params.get('showmuteafterattach') === 'true';
-
   if (showLastUpdate) {
     lastUpdateEl.classList.remove('hidden');
   }
@@ -71,11 +70,7 @@ const createPlayer = async (id: string): Promise<Result<Error, void>> => {
   const muxDataMonitor = createMuxDataMonitor(mux, video, hls, Hls, mux.utils.now());
   hls.attachMedia(video);
   hls.on(Hls.Events.MEDIA_ATTACHED, () => {
-    if (showMuteAfterAttach) {
-      muteOverlay.classList.remove('hidden');
-    }
-    video.muted = true;
-    void video.play();
+    void prepareAttachedMedia(video, muteOverlay);
   });
 
   muteButton.addEventListener('click', () => {
