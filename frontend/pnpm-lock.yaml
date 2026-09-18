@@ -12,8 +12,8 @@ importers:
         specifier: ^1.0.5
         version: 1.0.11
       ably:
-        specifier: ^1.2.15
-        version: 1.2.50
+        specifier: ^2.0.0
+        version: 2.28.0
       hls.js:
         specifier: ^1.0.10
         version: 1.6.16
@@ -21,8 +21,8 @@ importers:
         specifier: ^5.18.1
         version: 5.18.1
       nanoid:
-        specifier: ^5.0.0
-        version: 5.1.16
+        specifier: ^6.0.0
+        version: 6.0.1
     devDependencies:
       '@swc/core':
         specifier: ^1.15.46
@@ -1480,9 +1480,9 @@ packages:
     cpu: [x64]
     os: [win32]
 
-  ably@1.2.50:
-    resolution: {integrity: sha512-9uC5lE7wFBR7nOJdltArHU1UDaBu6CTMbMuie+brUuH884fM1mQuFiMzZetxVacygyUG38dp5MFOyOPF9h0RsQ==}
-    engines: {node: '>=5.10.x'}
+  ably@2.28.0:
+    resolution: {integrity: sha512-VHWAWaPRt+ysEQryI9Y0xN/fr0db4rvvUvk6akC9dAu06Ytax3/Vc8te2Z4IOwe+2AK41JpLxEbamEQVlqraIw==}
+    engines: {node: '>=16'}
     peerDependencies:
       react: '>=16.8.0'
       react-dom: '>=16.8.0'
@@ -1727,6 +1727,10 @@ packages:
     resolution: {integrity: sha512-4tvttepXG1VaYGrRibk5EwJd1t4udunSOVMdLSAL6mId1ix438oPwPZMALY41FCijukO1L0twNcGsdzS7dHgDg==}
     engines: {node: '>=10'}
 
+  dequal@2.0.3:
+    resolution: {integrity: sha512-0je+qPKHEMohvfRTCEo3CrPG6cAzAYgmzKyxRiYSSDkS6eGJdyVJm7WaYA5ECaAD9wLB2T4EEeymA5aFVcYXCA==}
+    engines: {node: '>=6'}
+
   detect-libc@1.0.3:
     resolution: {integrity: sha512-pGjwhsmsp4kL2RTz08wcOlGN83otlqHeD/Z5T8GXZB+/YcpQ/dgo+lbU8ZsGxV0HIvqqxo9l7mqYwyYMD9bKDg==}
     engines: {node: '>=0.10'}
@@ -1895,6 +1899,9 @@ packages:
 
   fast-levenshtein@2.0.6:
     resolution: {integrity: sha512-DCXu6Ifhqcks7TZKY3Hxp3y6qphY5SJZmrWMDrKcERSOXWQdMhU9Ig/PYrzyw/ul9jOIyh0N4M0tbC5hodg8dw==}
+
+  fastestsmallesttextencoderdecoder@1.0.22:
+    resolution: {integrity: sha512-Pb8d48e+oIuY4MaM64Cd7OW1gt4nxCHs7/ddPPZ/Ic3sg8yVGM7O9wDvZ7us6ScaUupzM+pfBolwtYhN1IxBIw==}
 
   fb-watchman@2.0.2:
     resolution: {integrity: sha512-p5161BqbuCaSnB8jIbzQHOlpgsPmK5rJVDfDKO91Axs5NC1uu3HRQm6wt9cd9/+GtQQIO53JdGXXoyDpTAsgYA==}
@@ -2522,9 +2529,9 @@ packages:
     engines: {node: ^10 || ^12 || ^13.7 || ^14 || >=15.0.1}
     hasBin: true
 
-  nanoid@5.1.16:
-    resolution: {integrity: sha512-kVrnsrJqMR8+oLJnGEmSWw9BivK5mt7H3FZatVRjrc5wGqFYuBxX1yG7+A7Gi5AefkX6t/oCkizcQgpu0cY1dQ==}
-    engines: {node: ^18 || >=20}
+  nanoid@6.0.1:
+    resolution: {integrity: sha512-3wVS3i51pE2pi1k5FFL/95BGfVS0kSsvDVuGXHOtxox/TywUmtgq+3qiTOTbs9J7KfHaXPiN171k/A6dBnaXFw==}
+    engines: {node: ^22 || ^24 || >=26}
     hasBin: true
 
   napi-postinstall@0.3.4:
@@ -2900,6 +2907,10 @@ packages:
   typescript@7.0.2:
     resolution: {integrity: sha512-8FYau96o3NKOhbjKi/qNvG/W5jhzxkbdm5sj9AbZ/5T5sWqn3hJgLfGx27sRKZWTvyzCP8dLRBTf5tBTSRVUNA==}
     engines: {node: '>=16.20.0'}
+    hasBin: true
+
+  ulid@2.4.0:
+    resolution: {integrity: sha512-fIRiVTJNcSRmXKPZtGzFQv9WRrZ3M9eoptl/teFJvjOzmpU+/K/JH6HZ8deBfb5vMEpicJcLn7JmvdknlMq7Zg==}
     hasBin: true
 
   undici-types@8.3.0:
@@ -4642,10 +4653,13 @@ snapshots:
   '@unrs/resolver-binding-win32-x64-msvc@1.12.2':
     optional: true
 
-  ably@1.2.50:
+  ably@2.28.0:
     dependencies:
       '@ably/msgpack-js': 0.4.1
+      dequal: 2.0.3
+      fastestsmallesttextencoderdecoder: 1.0.22
       got: 11.8.6
+      ulid: 2.4.0
       ws: 8.21.1
     transitivePeerDependencies:
       - bufferutil
@@ -4881,6 +4895,8 @@ snapshots:
 
   defer-to-connect@2.0.1: {}
 
+  dequal@2.0.3: {}
+
   detect-libc@1.0.3: {}
 
   detect-libc@2.1.2: {}
@@ -5055,6 +5071,8 @@ snapshots:
   fast-json-stable-stringify@2.1.0: {}
 
   fast-levenshtein@2.0.6: {}
+
+  fastestsmallesttextencoderdecoder@1.0.22: {}
 
   fb-watchman@2.0.2:
     dependencies:
@@ -5807,7 +5825,7 @@ snapshots:
 
   nanoid@3.3.18: {}
 
-  nanoid@5.1.16: {}
+  nanoid@6.0.1: {}
 
   napi-postinstall@0.3.4: {}
 
@@ -6158,6 +6176,8 @@ snapshots:
       '@typescript/typescript-sunos-x64': 7.0.2
       '@typescript/typescript-win32-arm64': 7.0.2
       '@typescript/typescript-win32-x64': 7.0.2
+
+  ulid@2.4.0: {}
 
   undici-types@8.3.0: {}
 
