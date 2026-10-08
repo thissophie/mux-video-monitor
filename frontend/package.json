@@ -35,10 +35,10 @@
   },
   "dependencies": {
     "@types/chromecast-caf-sender": "^1.0.5",
-    "ably": "^1.2.15",
+    "ably": "^2.0.0",
     "hls.js": "^1.0.10",
     "mux-embed": "^5.18.1",
-    "nanoid": "^5.0.0"
+    "nanoid": "^6.0.0"
   },
   "browserslist": [
     "last 1 Edge version",
